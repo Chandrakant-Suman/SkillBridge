@@ -1,14 +1,3 @@
----
-title: SkillBridge AI
-emoji: 🧭
-colorFrom: blue
-colorTo: indigo
-sdk: docker
-app_port: 7860
-pinned: false
-short_description: Find missing skills for a job and get an ordered learning plan
----
-
 # SkillBridge AI: Resume-to-Job Skill Gap Analyzer
 
 Upload your resume and a job description (PDF or .txt). SkillBridge AI shows which skills the job needs that your resume doesn't, and gives a short learning plan that puts prerequisites first.
@@ -22,7 +11,7 @@ Upload your resume and a job description (PDF or .txt). SkillBridge AI shows whi
 - **Explainable score:** `70% required-skill coverage + 30% semantic match`. It is a heuristic, not an ATS score or a hiring probability.
 
 ## Tech stack
-Python · FastAPI · Pydantic · PyMuPDF · Sentence-Transformers (`all-MiniLM-L6-v2`, PyTorch) · HTML/CSS/JavaScript · pytest · Docker · Hugging Face Spaces
+Python · FastAPI · Pydantic · PyMuPDF · Sentence embeddings (`all-MiniLM-L6-v2` on ONNX Runtime via fastembed) · NumPy · HTML/CSS/JavaScript · pytest · Docker · Render
 
 ## How it works
 ```text
@@ -37,6 +26,8 @@ Browser (frontend/)  --FormData-->  POST /analyze  (app/main.py)
 ```
 
 **Why a hybrid?** I tested pure embedding matching on skill names. It rated *MySQL vs PostgreSQL* (0.55) as more similar than *ML vs Machine Learning* (0.37), so it can't reliably decide which skills you have. The dictionary decides named skills exactly. Embeddings handle what keywords can't: requirement sentences like "experience building backend services".
+
+**Why ONNX instead of PyTorch?** The first version ran the model with PyTorch (sentence-transformers) and used about 554 MB of RAM, more than a 512 MB free server allows. Running the same model on ONNX Runtime gives identical similarity scores at about 253 MB, and the install drops from ~1.1 GB to ~180 MB.
 
 ## Run locally (Windows PowerShell)
 ```powershell
@@ -56,6 +47,9 @@ python -m pytest -q
 45 tests cover file reading, skill extraction (aliases, no substring false positives, required vs preferred, "or" alternatives that let you learn just one), scoring, semantic search, roadmap ordering and deadlines, and API errors.
 
 On the 5 sample resume/job pairs, every resume scored highest on the job it was written for. That is a sanity check on 5 hand-made pairs, not a measured accuracy figure.
+
+## Deployment (Render, free plan)
+The repo has a `Dockerfile` and a `render.yaml` blueprint. In Render: **New → Blueprint**, pick this repository, and deploy. The image includes the embedding model, so startup doesn't download it. The free plan sleeps after about 15 minutes idle, so the first request after that takes about a minute.
 
 ## Limitations
 - Only skills in the curated dictionary are detected as named skills.

@@ -7,9 +7,15 @@ resume. This catches meaning that shares no keywords, e.g.
 We do NOT use embeddings to decide which named skills you have: in testing, the model
 rated "MySQL" vs "PostgreSQL" as more similar than "ML" vs "Machine Learning", so the
 dictionary in skill_extractor.py stays in charge of skill names.
+
+The model runs on ONNX Runtime (via fastembed) instead of PyTorch: same model and same
+similarity scores, but ~250 MB of RAM instead of ~550 MB, so it fits free 512 MB hosts.
 """
+import os
 import re
 from functools import lru_cache
+
+import numpy as np
 
 MODEL_NAME = "sentence-transformers/all-MiniLM-L6-v2"
 STRONG_MATCH = 0.50   # >= this: requirement clearly shown in the resume
@@ -22,8 +28,15 @@ _BULLET = re.compile(r"^\s*[-*>\N{BULLET}\N{BLACK CIRCLE}\N{MIDDLE DOT}]\s*|^\s*
 @lru_cache(maxsize=1)
 def get_model():
     """Load the model once per process (about 90 MB, a few seconds)."""
-    from sentence_transformers import SentenceTransformer  # heavy import, done lazily
-    return SentenceTransformer(MODEL_NAME)
+    from fastembed import TextEmbedding  # heavy import, done lazily
+    # MODEL_CACHE_DIR lets the Docker image ship the model instead of downloading it at startup.
+    return TextEmbedding(MODEL_NAME, cache_dir=os.environ.get("MODEL_CACHE_DIR"))
+
+
+def embed(lines: list[str]) -> np.ndarray:
+    """One unit-length vector per line, so a dot product equals cosine similarity."""
+    vectors = np.array(list(get_model().embed(lines)))
+    return vectors / np.linalg.norm(vectors, axis=1, keepdims=True)
 
 
 def split_lines(text: str) -> list[str]:
@@ -53,12 +66,7 @@ def match_requirements(requirement_lines: list[str], resume_text: str) -> list[d
     resume_lines = split_lines(resume_text)
     if not requirement_lines or not resume_lines:
         return []
-    from sentence_transformers import util
-
-    model = get_model()
-    req_vecs = model.encode(requirement_lines, convert_to_tensor=True, normalize_embeddings=True)
-    res_vecs = model.encode(resume_lines, convert_to_tensor=True, normalize_embeddings=True)
-    scores = util.cos_sim(req_vecs, res_vecs)  # matrix: requirements x resume lines
+    scores = embed(requirement_lines) @ embed(resume_lines).T  # matrix: requirements x resume lines
 
     results = []
     for i, requirement in enumerate(requirement_lines):

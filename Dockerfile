@@ -1,22 +1,21 @@
-# Image for Hugging Face Spaces (Docker SDK). Also runs anywhere Docker runs.
+# Production image (used by Render; runs anywhere Docker runs).
 FROM python:3.12-slim
 
-# Spaces run containers as user 1000.
 RUN useradd -m -u 1000 user
 USER user
 ENV HOME=/home/user \
     PATH=/home/user/.local/bin:$PATH \
-    PYTHONUNBUFFERED=1
+    PYTHONUNBUFFERED=1 \
+    MODEL_CACHE_DIR=/home/user/models
 WORKDIR /home/user/app
 
-# CPU-only PyTorch first: the default Linux wheel bundles CUDA and is several GB.
-RUN pip install --no-cache-dir --user torch==2.14.1 --index-url https://download.pytorch.org/whl/cpu
 COPY --chown=user requirements.txt .
 RUN pip install --no-cache-dir --user -r requirements.txt
 
-# Download the embedding model at build time so startup doesn't need the internet.
-RUN python -c "from sentence_transformers import SentenceTransformer; SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')"
+# Bake the embedding model into the image so a cold start doesn't download it.
+RUN python -c "from fastembed import TextEmbedding; TextEmbedding('sentence-transformers/all-MiniLM-L6-v2', cache_dir='/home/user/models')"
 
 COPY --chown=user . .
-EXPOSE 7860
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "7860"]
+EXPOSE 8000
+# Render (and most hosts) pass the port in $PORT.
+CMD uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}
