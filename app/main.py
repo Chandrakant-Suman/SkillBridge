@@ -9,12 +9,14 @@ from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 
 from app.analyzer import run_analysis
-from app.file_reader import MAX_FILE_SIZE_BYTES, DocumentError, read_document
+from app.file_reader import MAX_FILE_SIZE_BYTES, DocumentError, normalize_text, read_document
 from app.schemas import AnalysisResponse
 from app.semantic import get_model
 
 logger = logging.getLogger("skillbridge")
-MAX_JD_CHARS = 20_000
+MAX_TEXT_CHARS = 20_000
+MIN_RESUME_CHARS = 10  # "Python, SQL" is enough when only skills are typed
+MIN_JD_CHARS = 50
 
 
 @asynccontextmanager
@@ -51,26 +53,38 @@ async def read_upload(upload: UploadFile) -> str:
         raise HTTPException(400, str(exc))
 
 
+async def combine(upload: UploadFile | None, typed: str | None, typed_heading: str = "") -> str:
+    """Text from the uploaded file and/or the text box. Either one alone is enough."""
+    parts = []
+    if upload is not None and upload.filename:
+        parts.append(await read_upload(upload))
+    if typed and typed.strip():
+        # An optional heading line tells the section detector what the typed text is.
+        parts.append(f"{typed_heading}\n{normalize_text(typed)}".strip())
+    return "\n\n".join(parts)
+
+
 @app.post("/analyze", response_model=AnalysisResponse)
 async def analyze(
-    resume: UploadFile = File(..., description="Resume: text-based PDF or .txt, max 5 MB"),
+    resume: UploadFile | None = File(None, description="Resume: text-based PDF or .txt, max 5 MB"),
+    resume_text: str | None = Form(None, max_length=MAX_TEXT_CHARS,
+                                   description="...and/or technical skills typed as text"),
     job_file: UploadFile | None = File(None, description="Job description as PDF or .txt"),
-    job_text: str | None = Form(None, max_length=MAX_JD_CHARS, description="...or pasted text"),
+    job_text: str | None = Form(None, max_length=MAX_TEXT_CHARS, description="...and/or pasted text"),
     hours_per_day: float | None = Form(None, gt=0, le=16),
     deadline: date | None = Form(None),
 ):
     if deadline is not None and deadline <= date.today():
         raise HTTPException(422, "Deadline must be a future date.")
 
-    resume_text = await read_upload(resume)
-    if job_file is not None and job_file.filename:
-        job_description = await read_upload(job_file)
-    elif job_text and len(job_text.strip()) >= 50:
-        job_description = job_text.strip()
-    else:
-        raise HTTPException(422, "Upload a job description file or paste at least 50 characters.")
+    candidate = await combine(resume, resume_text, "Technical Skills")
+    if len(candidate.strip()) < MIN_RESUME_CHARS:
+        raise HTTPException(422, "Upload your resume or type your technical skills.")
+    job_description = await combine(job_file, job_text)
+    if len(job_description.strip()) < MIN_JD_CHARS:
+        raise HTTPException(422, f"Upload a job description file or paste at least {MIN_JD_CHARS} characters.")
 
-    return run_analysis(resume_text, job_description, hours_per_day, deadline)
+    return run_analysis(candidate, job_description, hours_per_day, deadline)
 
 
 # Serve the website at "/". Mounted LAST so it doesn't shadow the API routes.

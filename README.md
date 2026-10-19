@@ -1,9 +1,13 @@
 # SkillBridge AI: Resume-to-Job Skill Gap Analyzer
 
+[![CI](https://github.com/Chandrakant-Suman/SkillBridge/actions/workflows/ci.yml/badge.svg)](https://github.com/Chandrakant-Suman/SkillBridge/actions/workflows/ci.yml)
+
+**Live demo:** https://skillbridge-9ctl.onrender.com (free plan: the first visit after a quiet period takes up to a minute to wake up)
+
 Upload your resume and a job description (PDF or .txt). SkillBridge AI shows which skills the job needs that your resume doesn't, and gives a short learning plan that puts prerequisites first.
 
 ## Features
-- **Resume and job description input:** text-based PDF or .txt, up to 5 MB each. The job description can also be pasted.
+- **Two-sided input:** on the left, your resume (PDF or .txt) and/or technical skills typed as text. On the right, the job description as a file and/or pasted text. Files can be up to 5 MB.
 - **Skill gap:** required vs nice-to-have skills that are missing, skills you have (with the resume line as evidence), and "uncertain" matches to double-check.
 - **Accepted alternatives:** for "FastAPI **or** Django", having Django is enough.
 - **Semantic requirement match:** each job requirement is paired with the most similar line in your resume, using a sentence-embedding model. This works even when the two share no keywords.
@@ -44,9 +48,13 @@ Try it with the fictional files in `samples/` (5 resumes and 5 job descriptions,
 ```powershell
 python -m pytest -q
 ```
-45 tests cover file reading, skill extraction (aliases, no substring false positives, required vs preferred, "or" alternatives that let you learn just one), scoring, semantic search, roadmap ordering and deadlines, and API errors.
+47 tests cover file reading, skill extraction (aliases, no substring false positives, required vs preferred, "or" alternatives that let you learn just one), scoring, semantic search, roadmap ordering and deadlines, and API errors.
 
 On the 5 sample resume/job pairs, every resume scored highest on the job it was written for. That is a sanity check on 5 hand-made pairs, not a measured accuracy figure.
+
+## CI/CD
+- **CI (GitHub Actions, `.github/workflows/ci.yml`):** every push and pull request installs the dependencies and runs the test suite. If the tests pass, a second job builds the production Docker image, starts it, and checks `/health`.
+- **CD (Render):** pushes to `main` redeploy the live site automatically. With Render's Auto-Deploy set to "After CI checks pass", a failing build never reaches users.
 
 ## Deployment (Render, free plan)
 The repo has a `Dockerfile` and a `render.yaml` blueprint. In Render: **New → Blueprint**, pick this repository, and deploy. The image includes the embedding model, so startup doesn't download it. The free plan sleeps after about 15 minutes idle, so the first request after that takes about a minute.

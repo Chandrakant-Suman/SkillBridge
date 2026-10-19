@@ -53,3 +53,11 @@ button:disabled { opacity: .6; cursor: wait; }
   .req td { display: block; border: 0; padding: 4px 0; }
   .req tr { display: block; border-bottom: 1px solid var(--border); padding: 8px 0; }
 }
+
+/* Input form: resume on the left, job description on the right. */
+.halves { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.half { border: 1px solid var(--border); border-radius: 10px; padding: 4px 16px 16px; margin: 0; min-width: 0; }
+.half legend { font-weight: 700; color: var(--accent); padding: 0 6px; }
+@media (max-width: 760px) {
+  .halves { grid-template-columns: 1fr; }
+}

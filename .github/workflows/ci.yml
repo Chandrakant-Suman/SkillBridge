@@ -1,0 +1,48 @@
+# CI: on every push and pull request, run the tests and check the Docker image builds.
+# CD: Render redeploys the app from main (set Auto-Deploy to "After CI checks pass").
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    env:
+      MODEL_CACHE_DIR: ${{ github.workspace }}/.model-cache
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Cache the embedding model
+        uses: actions/cache@v4
+        with:
+          path: .model-cache
+          key: model-all-MiniLM-L6-v2
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run tests
+        run: python -m pytest -q
+
+  docker:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build the production image
+        run: docker build -t skillbridge .
+      - name: Smoke-test the container
+        run: |
+          docker run -d -p 8000:8000 --name app skillbridge
+          for i in $(seq 1 30); do curl -sf localhost:8000/health && exit 0; sleep 2; done
+          docker logs app
+          exit 1

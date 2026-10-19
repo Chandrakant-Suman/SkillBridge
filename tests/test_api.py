@@ -49,6 +49,20 @@ def test_sample_files_txt_resume_and_pdf_jd(client):
     assert "Python" in missing
 
 
+def test_typed_skills_without_a_resume_file(client):
+    res = client.post("/analyze", data={"resume_text": "Python, SQL, Git, Docker", "job_text": SAMPLE_JD})
+    assert res.status_code == 200
+    matched = {s["skill"] for s in res.json()["matched"]}
+    assert {"Python", "SQL", "Git", "Docker"} <= matched
+
+
+def test_typed_skills_are_added_to_the_resume_file(client, resume_pdf):
+    without = post(client, resume_pdf).json()
+    with_typed = post(client, resume_pdf, resume_text="Docker").json()
+    assert "Docker" in {s["skill"] for s in without["missing_required"]}
+    assert "Docker" in {s["skill"] for s in with_typed["matched"]}
+
+
 def test_rejects_non_pdf(client):
     res = post(client, b"just some text, not a pdf at all" * 5, resume_name="resume.pdf")
     assert res.status_code == 400

@@ -35,11 +35,10 @@ function checkFile(file, label) {
 
 function validate() {
   const resume = form.resume.files[0];
-  if (!resume) return "Please choose your resume.";
+  if (!resume && form.resume_text.value.trim().length < 10) return "Upload your resume or type your technical skills.";
   const jobFile = form.job_file.files[0];
-  const jobText = form.job_text.value.trim();
-  if (!jobFile && jobText.length < 50) return "Upload a job description file or paste at least 50 characters.";
-  return checkFile(resume, "Resume") || (jobFile && checkFile(jobFile, "Job description")) || null;
+  if (!jobFile && form.job_text.value.trim().length < 50) return "Upload a job description file or paste at least 50 characters.";
+  return (resume && checkFile(resume, "Resume")) || (jobFile && checkFile(jobFile, "Job description")) || null;
 }
 
 form.addEventListener("submit", async (event) => {
@@ -50,10 +49,12 @@ form.addEventListener("submit", async (event) => {
 
   const data = new FormData(form);
   // Don't send empty optional fields: the API expects them to be absent, not "".
-  for (const key of ["hours_per_day", "deadline", "job_text"]) {
+  for (const key of ["hours_per_day", "deadline", "job_text", "resume_text"]) {
     if (!String(data.get(key) ?? "").trim()) data.delete(key);
   }
-  if (!form.job_file.files[0]) data.delete("job_file");
+  for (const key of ["resume", "job_file"]) {
+    if (!form[key].files[0]) data.delete(key);
+  }
 
   submitBtn.disabled = true;
   submitBtn.textContent = "Analyzing…";

@@ -6,3 +6,4 @@ __pycache__/
 # Never commit real resumes. The fictional demo files in samples/ are allowed.
 *.pdf
 !samples/*.pdf
+.model-cache/

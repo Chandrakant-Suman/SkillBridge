@@ -9,25 +9,38 @@
 <body>
   <header>
     <h1>SkillBridge</h1>
-    <p>Upload your resume and a job description. See which skills you're missing and the order to learn them.</p>
+    <p>Add your resume or skills on the left and the job on the right. See which skills you're missing and the order to learn them.</p>
   </header>
 
   <main>
     <form id="analyze-form" class="card" novalidate>
-      <label>Resume (PDF or .txt, max 5 MB)
-        <input type="file" id="resume" name="resume" accept=".pdf,.txt,application/pdf,text/plain" required>
-      </label>
-      <small id="resume-info" class="muted"></small>
+      <div class="halves">
+        <fieldset class="half">
+          <legend>You</legend>
+          <label>Resume (PDF or .txt, max 5 MB)
+            <input type="file" id="resume" name="resume" accept=".pdf,.txt,application/pdf,text/plain">
+          </label>
+          <small id="resume-info" class="muted"></small>
 
-      <label>Job description file (PDF or .txt)
-        <input type="file" id="job_file" name="job_file" accept=".pdf,.txt,application/pdf,text/plain">
-      </label>
-      <small id="job-info" class="muted"></small>
+          <label>…and/or type your technical skills
+            <textarea id="resume_text" name="resume_text" rows="8"
+                      placeholder="e.g. Python, SQL, Git, React, Docker&#10;Built a REST API with FastAPI and PostgreSQL."></textarea>
+          </label>
+        </fieldset>
 
-      <label>…or paste the job description
-        <textarea id="job_text" name="job_text" rows="8"
-                  placeholder="Paste the full job description, including Requirements / Nice to have sections."></textarea>
-      </label>
+        <fieldset class="half">
+          <legend>The job</legend>
+          <label>Job description file (PDF or .txt)
+            <input type="file" id="job_file" name="job_file" accept=".pdf,.txt,application/pdf,text/plain">
+          </label>
+          <small id="job-info" class="muted"></small>
+
+          <label>…and/or paste the job description
+            <textarea id="job_text" name="job_text" rows="8"
+                      placeholder="Paste the full job description, including Requirements / Nice to have sections."></textarea>
+          </label>
+        </fieldset>
+      </div>
 
       <div class="row">
         <label>Study hours per day (optional)
