@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SkillBridge</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <h1>SkillBridge</h1>
+    <p>Upload your resume and a job description. See which skills you're missing and the order to learn them.</p>
+  </header>
+
+  <main>
+    <form id="analyze-form" class="card" novalidate>
+      <label>Resume (PDF or .txt, max 5 MB)
+        <input type="file" id="resume" name="resume" accept=".pdf,.txt,application/pdf,text/plain" required>
+      </label>
+      <small id="resume-info" class="muted"></small>
+
+      <label>Job description file (PDF or .txt)
+        <input type="file" id="job_file" name="job_file" accept=".pdf,.txt,application/pdf,text/plain">
+      </label>
+      <small id="job-info" class="muted"></small>
+
+      <label>…or paste the job description
+        <textarea id="job_text" name="job_text" rows="8"
+                  placeholder="Paste the full job description, including Requirements / Nice to have sections."></textarea>
+      </label>
+
+      <div class="row">
+        <label>Study hours per day (optional)
+          <input type="number" id="hours_per_day" name="hours_per_day" min="0.5" max="16" step="0.5">
+        </label>
+        <label>Target deadline (optional)
+          <input type="date" id="deadline" name="deadline">
+        </label>
+      </div>
+
+      <p id="form-error" class="error" role="alert" hidden></p>
+      <button type="submit" id="submit-btn">Analyze</button>
+    </form>
+
+    <section id="results" hidden aria-live="polite"></section>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>

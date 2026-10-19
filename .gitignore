@@ -1,0 +1,8 @@
+.venv/
+__pycache__/
+.pytest_cache/
+.env
+
+# Never commit real resumes. The fictional demo files in samples/ are allowed.
+*.pdf
+!samples/*.pdf

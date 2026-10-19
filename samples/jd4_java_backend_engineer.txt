@@ -1,0 +1,19 @@
+Java Backend Engineer
+Demo Payments Ltd, Hyderabad
+
+Responsibilities
+Design and develop scalable microservices for our payments platform.
+Own services end to end, from design to production monitoring.
+
+Requirements
+Strong Java and Spring Boot experience.
+Experience designing microservices and REST APIs.
+Good knowledge of MySQL or PostgreSQL.
+Experience with Docker and Kubernetes.
+CI/CD using Jenkins or GitHub Actions.
+Minimum 1+ years of experience (internships count).
+
+Nice to have
+Kafka or other message queues.
+AWS experience.
+Knowledge of system design.

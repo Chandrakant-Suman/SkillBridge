@@ -1,0 +1,21 @@
+Sneha Iyer
+sneha.iyer@example.com | github.com/sneha-demo
+
+Education
+B.Tech in Computer Engineering, Demo National College, 2026, CGPA 8.6
+
+Technical Skills
+Java, Spring Boot, MySQL, Hibernate, JUnit, Maven, Git, AWS, Jenkins
+
+Projects
+Hotel Booking System - Microservices with Spring Boot (booking, payment, user services) communicating over REST.
+Used MySQL with Hibernate, wrote JUnit tests, and built the project with Maven.
+Deployed the services on AWS EC2 and automated builds with Jenkins.
+Student Grievance Portal - Java and Spring Boot web app with role-based access control.
+
+Experience
+Software Engineering Intern, Demo Insurance Tech (May 2025 - Jul 2025)
+Added REST endpoints to a Spring Boot service and fixed 15 production bugs.
+
+Achievements
+3-star coder on CodeChef (demo).

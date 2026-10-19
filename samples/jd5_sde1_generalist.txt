@@ -1,0 +1,7 @@
+SDE-1, Demo Tech Products. We are hiring fresh graduates who love solving problems.
+You should have strong fundamentals in data structures, algorithms and object-oriented programming,
+and be able to code well in at least one of Java, C++ or Python.
+A good grasp of operating systems, DBMS and computer networks is expected.
+You will work on Linux and use Git every day.
+Knowledge of system design basics and any cloud platform such as AWS is a plus.
+Eligibility: B.Tech/B.E. 2026 batch, CGPA 7.0 or above, no active backlogs.

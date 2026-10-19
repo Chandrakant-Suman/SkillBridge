@@ -1,0 +1,19 @@
+Karan Singh
+karan.singh@example.com
+
+Education
+B.Tech in Computer Science, Example Institute of Engineering, 2026, CGPA 7.8
+
+Technical Skills
+Languages: C++, C, Python (basic)
+Core: Data Structures, Algorithms, OOP, Operating Systems, DBMS, Computer Networks
+Tools: Git, Linux
+
+Projects
+Mini Shell - A Unix-like shell in C++ supporting pipes, redirection and background jobs on Linux.
+Library System - Console app in C++ using OOP concepts (inheritance, polymorphism) and file handling.
+Static Portfolio - Simple website with HTML and CSS.
+
+Achievements
+Solved 500+ problems on Codeforces and LeetCode; Codeforces rating 1550 (demo).
+Teaching assistant for the Data Structures lab.
